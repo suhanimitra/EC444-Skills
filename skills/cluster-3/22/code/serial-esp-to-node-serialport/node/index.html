@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Plotting of Temperature and Light (Lux)</title>
+    <!-- Include CanvasJS library -->
+    <script src="https://canvasjs.com/assets/script/canvasjs.min.js"></script>
+</head>
+<script src="/socket.io/socket.io.js"></script>
+<script>
+</script>
+<body>
+    <div id="chartContainer" style="height: 300px; width: 100%;"></div>
+
+    <script>
+        // Create empty data arrays for temperature and lux
+        let tempDataPoints = [];
+        let luxDataPoints = [];
+        let time = 0; // Initialize time variable for the x-axis
+
+        // Create the chart with two lines: one for temperature and one for lux
+        let chart = new CanvasJS.Chart("chartContainer", {
+            title: {
+                text: "Temperature and Light (Lux) vs. Time"
+            },
+            axisX: {
+                title: "Time (seconds)",
+                interval: 1 // Define the interval for the time axis
+            },
+            axisY: {
+                title: "Values",
+                includeZero: false // Disable zero as a baseline
+            },
+            data: [
+                {
+                    type: "line",
+                    name: "Temperature (°C)",
+                    showInLegend: true,
+                    dataPoints: tempDataPoints
+                },
+                {
+                    type: "line",
+                    name: "Light (Lux)",
+                    showInLegend: true,
+                    dataPoints: luxDataPoints
+                }
+            ]
+        });
+
+        // Function to update the chart with new data
+        function updateChart(temp, lux) {
+            time++; // Increment time for each new data point
+            tempDataPoints.push({ x: time, y: temp }); // Add a new dataPoint for temperature
+            luxDataPoints.push({ x: time, y: lux });   // Add a new dataPoint for lux
+            chart.render();
+        }
+
+        // Listen for data delivered to the socket (from the node server)
+        const socket = io.connect();
+        socket.on("data", (data) => {
+            // Assuming data is an object in the format { temp, lux }
+            const temp = data.temp;
+            const lux = data.lux;
+
+            // Update the chart with the received temperature and lux values
+            updateChart(temp, lux);
+        });
+    </script>
+</body>
+</html>

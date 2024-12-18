@@ -1,0 +1,4 @@
+{
+    "idf.port": "/dev/tty.usbserial-0246DDC2",
+    "idf.flashType": "UART"
+}
